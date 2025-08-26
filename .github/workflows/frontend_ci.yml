@@ -26,6 +26,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Debug env
+      run: |
+        echo "ACR_NAME=${{ env.ACR_NAME }}"
+        echo "ACR_LOGIN_SERVER=${{ env.ACR_LOGIN_SERVER }}"
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -43,8 +48,11 @@ jobs:
     # Build and Push Docker image for Frontend
     - name: Build and Push Frontend Image
       run: |
-        docker build -t ${{ env.ACR_LOGIN_SERVER }}/frontend:latest ./frontend/
-        docker push ${{ env.ACR_LOGIN_SERVER }}/frontend:latest
+        TAG="${{ env.ACR_LOGIN_SERVER }}/frontend:latest"
+        echo "Using tag: $TAG"
+        docker buildx build --load -t "$TAG" ./frontend/
+        docker push "$TAG"
+
 
     # Logout from Azure for security (runs even if image push fails)
     - name: Logout from Azure
